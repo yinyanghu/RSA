@@ -1,0 +1,142 @@
+RSA Generator and Digital Signature
+
+Author: Jian Li (ID:yinyanghu), an undergraduate student in Nanjing University, China
+E-mail: lijianxp2005@gmail.com
+Google Talk: lijianxp2005@gmail.com
+
+******************************************************************************************************************************
+
+我做的Task是RSA Public Key系统，并且利用生成的RSA密钥做了一个Digital Signature
+我是在Linux下coding的，所以下面的命令都是unix命令，如果您是在Windows下运行，利用命令行终端进入Bin目录，然后运行exe文件即可
+
+RSA.cpp		RSA Public Key Generator
+
+用来生成RSA密钥，有四种Mode
+(0) (Default)Demo
+	生成一个250位左右的RSA Key，用作演示
+(1) --high-performance
+	生成一个500位左右的RSA Key，在对性能有较高要求及安全性较低要求时使用
+(2) --high-reliability
+	生成一个750位左右的RSA Key，在对安全性有较高要求时使用，大概能在5 Minutes内出解
+(3) --prime
+	随机生成一个指定位数的大质数，基于Miller-Rabin Algorithm
+(4) --digital-signature
+	生成两套RSA密钥，用于后面的Digital Signature程序
+
+屏幕上输出的Trial，是在生成一个大质数时，产生随机数的个数
+
+Example：
+unix > ./RSA --high-performance
+
+输出三个文件，默认为RSA_Key, RSA_Public_Key, RSA_Private_Key，其中RSA_Key为生成的RSA密钥的信息，另外两个文件为 Digital Signature 程序所需
+
+也可以在运行时，指定输出文件名
+
+Example:
+unix > ./RSA --high-performance AKS
+or
+unix > ./RSA MST
+
+则输出文件分别为：
+
+AKS_RSA_Key, AKS_RSA_Public_Key, AKS_RSA_Private_Key
+or
+MST_RSA_Key, MST_RSA_Public_Key, MST_RSA_Private_Key
+
+
+如果是 --digital-signature Mode， 则输出被指定为
+Alice_RSA_Key, Alice_RSA_Public_Key, Alice_RSA_Private_Key
+and
+Bob_RSA_Key, Bob_RSA_Public_Key, Bob_RSA_Private_Key
+
+
+
+
+如需帮助，请输入 --help
+Example:
+unix > ./RSA --help
+
+
+
+
+
+
+
+Encoder.cpp	Digital Signature Encoder
+
+利用RSA产生的密钥，来加密自己的Signature，并转化成Digital Signature
+
+****************************************************************************************
+Attention!
+在运行本程序前，请务必运行RSA程序的--digital-signature Mode
+****************************************************************************************
+
+
+
+程序默认利用RSA程序 --digital-signature Mode下生成的两套密码，即默认密钥输入是来自文件
+Alice_RSA_Key, Alice_RSA_Public_Key, Alice_RSA_Private_Key
+and
+Bob_RSA_Key, Bob_RSA_Public_Key, Bob_RSA_Private_Key
+的，若要从其他文件中读入密钥，则使用参数 --name
+
+Example:
+unix > ./Encoder --name
+
+
+程序会把你输入的签名，加密后，写入文件Signature
+
+请将此文件和你的Public Key发给Receiver
+
+
+如需帮助，请输入 --help
+Example:
+unix > ./Encoder --help
+
+
+
+
+
+
+Decoder.cpp	Digital Signature Decoder
+
+利用RSA产生的密钥，来解密自己的Signature，并转化成Digital Signature
+
+****************************************************************************************
+Attention!
+在运行本程序前，请务必运行Encoder程序
+****************************************************************************************
+
+
+程序默认利用RSA程序 --digital-signature Mode下生成的两套密码，即默认密钥输入是来自文件
+Signature,
+Alice_RSA_Key, Alice_RSA_Public_Key, Alice_RSA_Private_Key
+and
+Bob_RSA_Key, Bob_RSA_Public_Key, Bob_RSA_Private_Key
+的，若要从其他文件中读入密钥，则使用参数 --name
+
+Example:
+unix > ./Decoder --name
+
+
+程序会把Sender发送的Signature文件中的签名，解密后，输出到屏幕上
+
+
+
+如需帮助，请输入 --help
+Example:
+unix > ./Decoder --help
+
+
+
+
+
+Digital Signature完整运行过程：
+
+unix > ./RSA --digital-signature
+unix > ./Encoder
+unix > ./Decoder
+
+
+
+Copyright © 2011 Jian Li. All rights reserved.
+
