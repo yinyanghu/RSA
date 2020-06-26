@@ -38,28 +38,28 @@ inline int abs(int key)
 	return (key < 0) ? -key : key;
 }
 
-struct unsigned_BigInt
+struct UnsignedBigInt
 {
 	int len;
 	int __data[capacity];
-	unsigned_BigInt() : len(0) {}
-	unsigned_BigInt(const unsigned_BigInt &source) : len(source.len)
+	UnsignedBigInt() : len(0) {}
+	UnsignedBigInt(const UnsignedBigInt &source) : len(source.len)
 	{
 		memcpy(__data, source.__data, len * sizeof *__data);
 	}
-	unsigned_BigInt(int key) : len(0)
+	UnsignedBigInt(int key) : len(0)
 	{
 		for (; key > 0; key >>= base_bit)
 			__data[len ++] = key & base_mod;
 	}
 /*
-	unsigned_BigInt(long long key) : len(0)
+	UnsignedBigInt(long long key) : len(0)
 	{
 		for (; key > 0; key /= base)
 			__data[len ++] = key % base;
 	}
 */
-	unsigned_BigInt & operator = (const unsigned_BigInt &key)
+	UnsignedBigInt & operator = (const UnsignedBigInt &key)
 	{
 		len = key.len;
 		memcpy(__data, key.__data, len * sizeof *__data);
@@ -69,7 +69,7 @@ struct unsigned_BigInt
 	int operator [] (int Index) const { return __data[Index]; }
 };
 
-inline int compare(const unsigned_BigInt &A, const unsigned_BigInt &B)
+inline int compare(const UnsignedBigInt &A, const UnsignedBigInt &B)
 {
 	if (A.len != B.len) return A.len > B.len ? 1 : -1;
 	int i;
@@ -79,7 +79,7 @@ inline int compare(const unsigned_BigInt &A, const unsigned_BigInt &B)
 }
 
 
-inline void shift_right_base(unsigned_BigInt &A)
+inline void shift_right_base(UnsignedBigInt &A)
 {
 	if (A.len == 0) return;
 	for (int i = 0; i < A.len - 1; ++ i)
@@ -87,7 +87,7 @@ inline void shift_right_base(unsigned_BigInt &A)
 	-- A.len;
 }
 
-inline void shift_left_base(unsigned_BigInt &A)
+inline void shift_left_base(UnsignedBigInt &A)
 {
 	if (A.len == 0) return;
 	for (int i = A.len; i > 0; -- i)
@@ -96,7 +96,7 @@ inline void shift_left_base(unsigned_BigInt &A)
 	++ A.len;
 }
 
-inline void shift_right(unsigned_BigInt &A)
+inline void shift_right(UnsignedBigInt &A)
 {
 	if (A.len == 0) return;
 	for (int i = 0; i < A.len - 1; ++ i)
@@ -109,7 +109,7 @@ inline void shift_right(unsigned_BigInt &A)
 	if (A[A.len - 1] == 0) -- A.len;
 }
 
-inline void shift_left(unsigned_BigInt &A)
+inline void shift_left(UnsignedBigInt &A)
 {
 	if (A.len == 0) return;
 	int k = A.len;
@@ -127,9 +127,9 @@ inline void shift_left(unsigned_BigInt &A)
 
 
 
-unsigned_BigInt operator + (const unsigned_BigInt &A, const unsigned_BigInt &B)
+UnsignedBigInt operator + (const UnsignedBigInt &A, const UnsignedBigInt &B)
 {
-	unsigned_BigInt R;
+	UnsignedBigInt R;
 	int i;
 	int Carry = 0;
 	for (i = 0; i < A.len || i < B.len || Carry > 0; ++ i)
@@ -144,9 +144,9 @@ unsigned_BigInt operator + (const unsigned_BigInt &A, const unsigned_BigInt &B)
 	
 }
 
-unsigned_BigInt operator - (const unsigned_BigInt &A, const unsigned_BigInt &B)
+UnsignedBigInt operator - (const UnsignedBigInt &A, const UnsignedBigInt &B)
 {
-	unsigned_BigInt R;
+	UnsignedBigInt R;
 	int Carry = 0;
 	R.len = A.len;
 	for (int i = 0; i < R.len; ++ i)
@@ -160,11 +160,11 @@ unsigned_BigInt operator - (const unsigned_BigInt &A, const unsigned_BigInt &B)
 	return R;
 }
 
-unsigned_BigInt operator * (const unsigned_BigInt &A, const int B)
+UnsignedBigInt operator * (const UnsignedBigInt &A, const int B)
 {
 	int i;
 	if (B == 0) return 0;
-	unsigned_BigInt R;
+	UnsignedBigInt R;
 	long long Carry = 0;
 	for (i = 0; i < A.len || Carry > 0; ++ i)
 	{
@@ -176,10 +176,10 @@ unsigned_BigInt operator * (const unsigned_BigInt &A, const int B)
 	return R;
 }
 
-unsigned_BigInt operator * (const unsigned_BigInt &A, const unsigned_BigInt &B)
+UnsignedBigInt operator * (const UnsignedBigInt &A, const UnsignedBigInt &B)
 {
 	if (B.len == 0) return 0;
-	unsigned_BigInt R;
+	UnsignedBigInt R;
 	for (int i = 0; i < A.len; ++ i)
 	{
 		long long Carry = 0;
@@ -197,10 +197,10 @@ unsigned_BigInt operator * (const unsigned_BigInt &A, const unsigned_BigInt &B)
 
 
 
-unsigned_BigInt operator / (const unsigned_BigInt &A, const int B)
+UnsignedBigInt operator / (const UnsignedBigInt &A, const int B)
 {
 
-	unsigned_BigInt R;
+	UnsignedBigInt R;
 	long long C = 0;
 	for (int i = A.len - 1; i >= 0; -- i)
 	{
@@ -214,7 +214,7 @@ unsigned_BigInt operator / (const unsigned_BigInt &A, const int B)
 
 }
 
-unsigned_BigInt operator % (const unsigned_BigInt &A, const int B)
+UnsignedBigInt operator % (const UnsignedBigInt &A, const int B)
 {
 	long long C = 0;
 	for (int i = A.len - 1; i >= 0; -- i)
@@ -226,11 +226,11 @@ unsigned_BigInt operator % (const unsigned_BigInt &A, const int B)
 }
 
 
-inline void divide(const unsigned_BigInt &A, const unsigned_BigInt &B, unsigned_BigInt &Q, unsigned_BigInt &R)
+inline void divide(const UnsignedBigInt &A, const UnsignedBigInt &B, UnsignedBigInt &Q, UnsignedBigInt &R)
 {
 	static bool flag[exponentiation_size];  //odd ---> true, even ---> false
 	static int top;
-	static unsigned_BigInt temp_divide;
+	static UnsignedBigInt temp_divide;
 	
 	temp_divide = A;
 	for (top = 0; compare(temp_divide, B) >= 0; ++ top)
@@ -278,17 +278,17 @@ inline void divide(const unsigned_BigInt &A, const unsigned_BigInt &B, unsigned_
 }
 
 
-unsigned_BigInt operator / (const unsigned_BigInt &A, const unsigned_BigInt &B)
+UnsignedBigInt operator / (const UnsignedBigInt &A, const UnsignedBigInt &B)
 {
 	if (compare(A, B) < 0) return 0;
 /*
-	unsigned_BigInt R, Q;
+	UnsignedBigInt R, Q;
 	divide(A, B, Q, R);
 	return Q;
 */
 
 
-	unsigned_BigInt R, Carry = 0;
+	UnsignedBigInt R, Carry = 0;
 	int left, right, mid;
 	for (int i = A.len - 1; i >= 0; -- i)
 	{
@@ -315,16 +315,16 @@ unsigned_BigInt operator / (const unsigned_BigInt &A, const unsigned_BigInt &B)
 
 }
 
-unsigned_BigInt operator % (const unsigned_BigInt &A, const unsigned_BigInt &B)
+UnsignedBigInt operator % (const UnsignedBigInt &A, const UnsignedBigInt &B)
 {
 	if (compare(A, B) < 0) return A;
 /*
-	unsigned_BigInt R, Q;
+	UnsignedBigInt R, Q;
 	divide(A, B, Q, R);
 	return R;
 
 */
-	unsigned_BigInt Carry = 0;
+	UnsignedBigInt Carry = 0;
 	int left, right, mid;
 	for (int i = A.len - 1; i >= 0; -- i)
 	{
@@ -351,7 +351,7 @@ unsigned_BigInt operator % (const unsigned_BigInt &A, const unsigned_BigInt &B)
 
 struct signed_BigInt
 {
-	unsigned_BigInt data;
+	UnsignedBigInt data;
 	int sign;
 	signed_BigInt() : data(0), sign(0) {}
 	signed_BigInt(const signed_BigInt &source) : sign(source.sign)
@@ -372,8 +372,8 @@ struct signed_BigInt
 
 
 
-const unsigned_BigInt unsigned_Zero = 0;
-const unsigned_BigInt unsigned_One = 1;
+const UnsignedBigInt unsigned_Zero = 0;
+const UnsignedBigInt unsigned_One = 1;
 
 const signed_BigInt Zero = 0;
 const signed_BigInt One = 1;
@@ -434,7 +434,7 @@ output_BigInt operator * (const output_BigInt &A, const int B)
 
 
 
-ostream & operator << (ostream &Out, const unsigned_BigInt &A)
+ostream & operator << (ostream &Out, const UnsignedBigInt &A)
 {
 	if (A.len == 0)
 	{
@@ -670,7 +670,7 @@ signed_BigInt Extended_Euclid_GCD(const signed_BigInt &A, const signed_BigInt &B
 
 struct BigInt_Exponentiation
 {
-	unsigned_BigInt N;
+	UnsignedBigInt N;
 	int len, valid;
 	int data[exponentiation_size];
 	BigInt_Exponentiation() : len(0) { memset(data, 0, sizeof(data)); }
@@ -679,7 +679,7 @@ struct BigInt_Exponentiation
 		memcpy(data, source.data, len * sizeof *data);
 	}
 /*	
-	BigInt_Exponentiation(unsigned_BigInt A) : len(0)
+	BigInt_Exponentiation(UnsignedBigInt A) : len(0)
 	{
 		for (; A.len != 0; A = A / 2)
 			data[len ++] = (A[0] & 1);
@@ -692,9 +692,9 @@ struct BigInt_Exponentiation
 
 
 
-unsigned_BigInt Bin_To_Int(const BigInt_Exponentiation &W)
+UnsignedBigInt Bin_To_Int(const BigInt_Exponentiation &W)
 {
-	unsigned_BigInt R;
+	UnsignedBigInt R;
 	R.len = 0;
 	int i, k;
 	for (i = 0; i + base_bit < W.len; i += base_bit)
@@ -716,9 +716,9 @@ unsigned_BigInt Bin_To_Int(const BigInt_Exponentiation &W)
 
 
 /*
-unsigned_BigInt __Bin_To_Int(const BigInt_Exponentiation &W)
+UnsignedBigInt __Bin_To_Int(const BigInt_Exponentiation &W)
 {
-	unsigned_BigInt R = 0;
+	UnsignedBigInt R = 0;
 	for (int i = W.len - 1; i >= 0; -- i)
 	{
 		R = R * 2;
@@ -730,12 +730,12 @@ unsigned_BigInt __Bin_To_Int(const BigInt_Exponentiation &W)
 
 */
 
-unsigned_BigInt Minus_One;
+UnsignedBigInt Minus_One;
 
 /*
-unsigned_BigInt __Modular_Exponentiation(unsigned_BigInt A, unsigned_BigInt B, const unsigned_BigInt &N)
+UnsignedBigInt __Modular_Exponentiation(UnsignedBigInt A, UnsignedBigInt B, const UnsignedBigInt &N)
 {
-	unsigned_BigInt R = 1;
+	UnsignedBigInt R = 1;
 	while (B.len != 0)
 	{
 		if ((B[0] & 1) == 1)
@@ -748,9 +748,9 @@ unsigned_BigInt __Modular_Exponentiation(unsigned_BigInt A, unsigned_BigInt B, c
 */
 
 
-unsigned_BigInt Modular_Exponentiation(unsigned_BigInt A, const BigInt_Exponentiation &W)
+UnsignedBigInt Modular_Exponentiation(UnsignedBigInt A, const BigInt_Exponentiation &W)
 {
-	unsigned_BigInt R = 1;
+	UnsignedBigInt R = 1;
 	for (int i = W.valid; i < W.len; ++ i)
 	{
 		if (W[i] == 1)
@@ -780,7 +780,7 @@ inline int optimal(const int bits)
 }
 
 
-unsigned_BigInt Exponentiation_Temp[128];
+UnsignedBigInt Exponentiation_Temp[128];
 int Optimal_K;
 
 
@@ -788,7 +788,7 @@ int Optimal_K;
 
 
 
-unsigned_BigInt Modular_Exponentiation_Valid(const unsigned_BigInt &A, const BigInt_Exponentiation &W)
+UnsignedBigInt Modular_Exponentiation_Valid(const UnsignedBigInt &A, const BigInt_Exponentiation &W)
 {
 //	BigInt_Exponentiation W = B;
 //	cout <<"-----------------" << W.len << endl;
@@ -799,11 +799,11 @@ unsigned_BigInt Modular_Exponentiation_Valid(const unsigned_BigInt &A, const Big
 	Exponentiation_Temp[1] = A;
 	if (limit >= 3)
 	{
-		unsigned_BigInt temp = (A * A) % W.N;
+		UnsignedBigInt temp = (A * A) % W.N;
 		for (int i = 3; i <= limit; i += 2)
 			Exponentiation_Temp[i] = (Exponentiation_Temp[i - 2] * temp) % W.N;
 	}
-	unsigned_BigInt R = 1;
+	UnsignedBigInt R = 1;
 	int i = W.len - 1;
 	while (i >= W.valid)
 		if (W[i] == 0)
@@ -860,9 +860,9 @@ BigInt_Exponentiation Get_Random_Binary(const int full, const int empty)   // LS
 
 /*
 
-unsigned_BigInt Get_Random(const int bits, const int style)		//style 0 -> all; 1 -> odd; -1 -> even; 2 -> odd and last bit != 5
+UnsignedBigInt Get_Random(const int bits, const int style)		//style 0 -> all; 1 -> odd; -1 -> even; 2 -> odd and last bit != 5
 {
-	unsigned_BigInt R = 0;
+	UnsignedBigInt R = 0;
 	if (bits > 1) R = (rand() % 9 + 1);
 	int i;
 	for (i = 2; i + base_dec_bit - 1 < bits; i += base_dec_bit)
@@ -891,13 +891,13 @@ unsigned_BigInt Get_Random(const int bits, const int style)		//style 0 -> all; 1
 
 */
 
-bool Miller_Rabin_Witness(const unsigned_BigInt &A, const BigInt_Exponentiation &W)
+bool Miller_Rabin_Witness(const UnsignedBigInt &A, const BigInt_Exponentiation &W)
 {
 	int t = W.valid;
-	unsigned_BigInt u = Minus_One;
+	UnsignedBigInt u = Minus_One;
 //	for (t = 0; (u[0] & 1) == 0; ++ t)
 //		u = u / 2;
-	unsigned_BigInt X[2];
+	UnsignedBigInt X[2];
 //	X[0] = Modular_Exponentiation_Valid(A, W);
 	X[0] = Modular_Exponentiation(A, W);
 //	cout << X[0] << endl;
@@ -930,7 +930,7 @@ bool Miller_Rabin_Primality_Test(const BigInt_Exponentiation &W, const int Trial
 	for (int i = 0; i < some_prime; ++ i)
 		if ((W.N % Prime[i]).len == 0) return false;
 	Minus_One = W.N - 1;
-	unsigned_BigInt A;
+	UnsignedBigInt A;
 
 /*	
 
@@ -1196,12 +1196,12 @@ int main(int argc, char *argv[])
 
 /*
 
-	unsigned_BigInt A = 30, B = 7;
+	UnsignedBigInt A = 30, B = 7;
 	cout << A % B << endl;
 	cout << A / B << endl;
 */
 /*
-	unsigned_BigInt A = 1;
+	UnsignedBigInt A = 1;
 	for (int i = 0; i < 40; ++ i)
 	{
 		A = shift_left(A);
@@ -1228,7 +1228,7 @@ int main(int argc, char *argv[])
 	cout << P << endl;
 */
 /*	
-	unsigned_BigInt P = Get_Random(200, 0);
+	UnsignedBigInt P = Get_Random(200, 0);
 
 	int i = 12343;
 		for (int j = 1000000000; ; ++ j)
@@ -1241,7 +1241,7 @@ int main(int argc, char *argv[])
 			}
 		}
 */	
-//	unsigned_BigInt A = Modular_Exponentiation(3, 6, 1000000);
+//	UnsignedBigInt A = Modular_Exponentiation(3, 6, 1000000);
 //	cout << A << endl;
 	
 	
