@@ -4,9 +4,6 @@
 
 namespace bigint {
 
-constexpr int kBaseBit = 30;
-constexpr int kBaseMask = (1 << kBaseBit) - 1;
-
 UnsignedBigInt::UnsignedBigInt() {}
 
 UnsignedBigInt::UnsignedBigInt(const UnsignedBigInt &o) {
@@ -22,16 +19,126 @@ UnsignedBigInt &UnsignedBigInt::operator=(const UnsignedBigInt &o) {
   return *this;
 }
 
-int &UnsignedBigInt::operator[](int index) { return digit_[index]; }
+BaseType &UnsignedBigInt::operator[](unsigned int index) {
+  while (index >= digit_.size()) {
+    digit_.push_back(0);
+  }
+  return digit_[index];
+}
 
-int UnsignedBigInt::operator[](int index) const { return digit_[index]; }
+BaseType UnsignedBigInt::operator[](unsigned int index) const {
+  if (index >= digit_.size()) {
+    return 0;
+  }
+  return digit_[index];
+}
+
+int UnsignedBigInt::Len() const { return digit_.size(); }
+
+void UnsignedBigInt::Clean() {
+  for (int i = digit_.size() - 1; i >= 0 && digit_[i] == 0; --i) {
+    digit_.pop_back();
+  }
+}
+
+void UnsignedBigInt::ShiftBaseLeft() {
+  int l = digit_.size();
+  if (l == 0) {
+    return;
+  }
+  digit_.push_back(digit_[l - 1]);
+  for (int i = l - 1; i; --i) {
+    digit_[i] = digit_[i - 1];
+  }
+  digit_[0] = 0;
+}
+
+void UnsignedBigInt::ShiftBaseRight() {
+  int l = digit_.size();
+  if (l == 0) {
+    return;
+  }
+  for (int i = 0; i < l - 1; ++i) {
+    digit_[i] = digit_[i + 1];
+  }
+  digit_.pop_back();
+}
+
+void UnsignedBigInt::ShiftRight() {
+  int l = digit_.size();
+  if (l == 0) {
+    return;
+  }
+  for (int i = 0; i < l - 1; ++i) {
+    digit_[i] = (digit_[i] >> 1);
+    if (digit_[i + 1] & 1) {
+      digit_[i] = digit_[i] | kBaseMSB;
+    }
+  }
+  digit_[l - 1] >>= 1;
+  if (digit_[l - 1] == 0) {
+    digit_.pop_back();
+  }
+}
+
+void UnsignedBigInt::ShiftLeft() {
+  int l = digit_.size();
+  if (l == 0) {
+    return;
+  }
+  if (digit_[l - 1] & kBaseMSB) {
+    digit_.push_back(1);
+  }
+  for (int i = l - 1; i >= 0; --i) {
+    digit_[i] = (digit_[i] << 1) & kBaseMask;
+    if (i && (digit_[i - 1] & kBaseMSB)) {
+      ++digit_[i];
+    }
+  }
+}
+
+int Compare(const UnsignedBigInt &x, const UnsignedBigInt &y) {
+  if (x.Len() != y.Len()) {
+    return x.Len() > y.Len() ? 1 : -1;
+  }
+  int i;
+  for (i = x.Len() - 1; i >= 0 && x[i] == y[i]; --i)
+    ;
+  if (i < 0) {
+    return 0;
+  }
+  return x[i] > y[i] ? 1 : -1;
+}
+
+UnsignedBigInt operator+(const UnsignedBigInt &a, const UnsignedBigInt &b) {
+  UnsignedBigInt c;
+  BaseType carry = 0;
+  for (int i = 0; i < std::max(a.Len(), b.Len()) || carry; ++i) {
+    carry += a[i] + b[i];
+    c[i] = carry & kBaseMask;
+    carry >>= kBaseBit;
+  }
+  return c;
+}
+
+UnsignedBigInt operator-(const UnsignedBigInt &a, const UnsignedBigInt &b) {
+  UnsignedBigInt c;
+  int carry = 0;
+  for (int i = 0; i < a.Len(); ++i) {
+    c[i] = a[i] - b[i] - carry;
+    if (c[i] < 0) {
+      carry = 1, c[i] += kBase;
+    } else {
+      carry = 0;
+    }
+  }
+  c.Clean();
+  return c;
+}
 
 }  // namespace bigint
 
-#define base 0x40000000    // 2^30
-#define __base 0x20000000  // 2^29
-//#define base_dec_bit 9
-#define ascii_size 128
+/*
 
 inline int sgn(int key) {
   if (key > 0) return 1;
@@ -39,80 +146,7 @@ inline int sgn(int key) {
   if (key == 0) return 0;
 }
 
-inline int abs(int key) { return (key < 0) ? -key : key; }
-
-inline int compare(const UnsignedBigInt &A, const UnsignedBigInt &B) {
-  if (A.len != B.len) return A.len > B.len ? 1 : -1;
-  int i;
-  for (i = A.len - 1; i >= 0 && A[i] == B[i]; --i)
-    ;
-  if (i < 0) return 0;
-  return A[i] > B[i] ? 1 : -1;
-}
-
-inline void shift_right_base(UnsignedBigInt &A) {
-  if (A.len == 0) return;
-  for (int i = 0; i < A.len - 1; ++i) A[i] = A[i + 1];
-  --A.len;
-}
-
-inline void shift_left_base(UnsignedBigInt &A) {
-  if (A.len == 0) return;
-  for (int i = A.len; i > 0; --i) A[i] = A[i - 1];
-  A[0] = 0;
-  ++A.len;
-}
-
-inline void shift_right(UnsignedBigInt &A) {
-  if (A.len == 0) return;
-  for (int i = 0; i < A.len - 1; ++i) {
-    A[i] = (A[i] >> 1);
-    if ((A[i + 1] & 1) == 1) A[i] = A[i] | __base;
-  }
-  A[A.len - 1] = A[A.len - 1] >> 1;
-  if (A[A.len - 1] == 0) --A.len;
-}
-
-inline void shift_left(UnsignedBigInt &A) {
-  if (A.len == 0) return;
-  int k = A.len;
-  if ((A[A.len - 1] & __base) != 0) A[A.len++] = 1;
-  for (int i = k - 1; i > 0; --i) {
-    A[i] = (A[i] << 1) & base_mod;
-    if ((A[i - 1] & __base) != 0) ++A[i];
-  }
-  A[0] = (A[0] << 1) & base_mod;
-}
-
-UnsignedBigInt operator+(const UnsignedBigInt &A, const UnsignedBigInt &B) {
-  UnsignedBigInt R;
-  int i;
-  int Carry = 0;
-  for (i = 0; i < A.len || i < B.len || Carry > 0; ++i) {
-    if (i < A.len) Carry += A[i];
-    if (i < B.len) Carry += B[i];
-    R[i] = Carry & base_mod;
-    Carry >>= base_bit;
-  }
-  R.len = i;
-  return R;
-}
-
-UnsignedBigInt operator-(const UnsignedBigInt &A, const UnsignedBigInt &B) {
-  UnsignedBigInt R;
-  int Carry = 0;
-  R.len = A.len;
-  for (int i = 0; i < R.len; ++i) {
-    R[i] = A[i] - Carry;
-    if (i < B.len) R[i] -= B[i];
-    if (R[i] < 0)
-      Carry = 1, R[i] += base;
-    else
-      Carry = 0;
-  }
-  while (R.len > 0 && R[R.len - 1] == 0) --R.len;
-  return R;
-}
+int abs(int key) { return (key < 0) ? -key : key; }
 
 UnsignedBigInt operator*(const UnsignedBigInt &A, const int B) {
   int i;
@@ -298,3 +332,5 @@ UnsignedBigInt Modular_Exponentiation(UnsignedBigInt A, UnsignedBigInt B,
   }
   return R;
 }
+
+*/
